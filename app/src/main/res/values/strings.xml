@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ListView / RecyclerViev</string>
+    <string name="textListView">Go to the recycler view</string>
+    <string name="textRecyclerView">Go to the list view</string>
+</resources>
