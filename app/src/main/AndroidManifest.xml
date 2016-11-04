@@ -2,21 +2,42 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.ivleshch.listview_recyclerviev">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ListViewActivity">
+        <activity
+            android:name=".listview.ListViewActivity"
+            android:screenOrientation="portrait">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        </activity>
+        <activity
+            android:name=".recyclerview.RecyclerViewActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".git.StudentDetailActivityGit"
+            android:parentActivityName=".listview.ListViewActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".google.StudentDetailActivityGoogle"
+            android:parentActivityName=".recyclerview.RecyclerViewActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".data.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".RecyclerViewActivity"/>
     </application>
 
 </manifest>

@@ -1,5 +1,20 @@
 <resources>
-    <string name="app_name">ListView / RecyclerViev</string>
+    <string name="app_name">GH16-Leshchenko</string>
     <string name="textListView">Go to the recycler view</string>
     <string name="textRecyclerView">Go to the list view</string>
+
+    <string name="birthday">Birthday: </string>
+    <string name="gender">Gender: </string>
+    <string name="followers">Followers: </string>
+    <string name="button_google">Google</string>
+
+    <string name="email">Email: </string>
+    <string name="public_repo">Repositories: </string>
+    <string name="location">Location: </string>
+    <string name="button_git">Git</string>
+
+    <string name="textSwitchListView">List view</string>
+    <string name="textSwitchRecyclerView">Recycler view</string>
+
+
 </resources>

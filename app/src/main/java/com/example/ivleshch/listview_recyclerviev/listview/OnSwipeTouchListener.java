@@ -1,4 +1,4 @@
-package com.example.ivleshch.listview_recyclerviev;
+package com.example.ivleshch.listview_recyclerviev.listview;
 
 import android.content.Context;
 import android.view.GestureDetector;

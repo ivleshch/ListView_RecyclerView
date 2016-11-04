@@ -1,14 +1,17 @@
-package com.example.ivleshch.listview_recyclerviev;
+package com.example.ivleshch.listview_recyclerviev.listview;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.example.ivleshch.listview_recyclerviev.R;
+import com.example.ivleshch.listview_recyclerviev.data.StudentInformation;
+import com.example.ivleshch.listview_recyclerviev.git.StudentDetailActivityGit;
 
 import java.util.ArrayList;
 
@@ -65,7 +68,11 @@ public class ListViewAdapter extends BaseAdapter {
         linkToGit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(studentInformation.getLinkToGit()));
+                Intent intent = new Intent(context, StudentDetailActivityGit.class)
+                        .putExtra("Name", studentInformation.getName())
+                        .putExtra("Login", studentInformation.getGitLogin())
+                        .putExtra("LinkToGit", studentInformation.getLinkToGit())
+                        ;
                 context.startActivity(intent);
             }
         });
