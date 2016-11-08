@@ -7,6 +7,7 @@
     <string name="gender">Gender: </string>
     <string name="followers">Followers: </string>
     <string name="button_google">Google</string>
+    <string name="Error">Information not found</string>
 
     <string name="email">Email: </string>
     <string name="public_repo">Repositories: </string>

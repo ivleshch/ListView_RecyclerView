@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -34,35 +35,52 @@ public class StudentDetailActivityGit extends AppCompatActivity {
     String repos_url;
     String location;
 
+    Boolean openActivityFromApp;
+
+    TextView nameGit,loginGit,errorGit,emailGit,locationGit;
+    Button openGit;
+    ImageView imgView;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_detail_git);
 
+        nameGit = (TextView) findViewById(R.id.NameGit);
+        loginGit = (TextView) findViewById(R.id.LoginGit);
+        openGit = (Button) findViewById(R.id.detailGit);
+        errorGit = (TextView) findViewById(R.id.ErrorGit);
+        emailGit = (TextView) findViewById(R.id.emailGit);
+        locationGit = (TextView) findViewById(R.id.locationGit);
+        imgView = (ImageView) findViewById(R.id.imageViewGit);
+
+        login = "";
+
         Intent intent = this.getIntent();
         if (intent != null && intent.hasExtra("Name") && intent.hasExtra("Login") && intent.hasExtra("LinkToGit")) {
+            openActivityFromApp = true;
             name = intent.getStringExtra("Name");
             login = intent.getStringExtra("Login");
             linkToGit = intent.getStringExtra("LinkToGit");
-
-            ((TextView) findViewById(R.id.NameGit)).setText(name);
-            ((TextView) findViewById(R.id.LoginGit)).setText("("+login+")");
-
-
-            Button openGit = (Button) findViewById(R.id.detailGit);
-            openGit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    StudentDetailActivityGit.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGit)));
+        } else {
+            if (intent != null) {
+                openActivityFromApp = false;
+                String[] arrayMessage = intent.getData().getPath().split("/");
+                if (arrayMessage.length > 1) {
+                    login = arrayMessage[1];
                 }
-            });
-
+            }
         }
-        try {
-            doGetRequest(login);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (login.length()>0) {
+            try {
+                doGetRequest(login);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else{
+            errorGit.setVisibility(View.VISIBLE);
         }
     }
 
@@ -96,41 +114,72 @@ public class StudentDetailActivityGit extends AppCompatActivity {
                                                     GitInfo gitInfo = gson.fromJson(res, GitInfo.class);
 
                                                     if (gitInfo != null) {
+
                                                         public_repos = gitInfo.getPublicRepos();
-                                                        email =  gitInfo.getEmail();
-                                                        avatar_url= gitInfo.getAvatarUrl();
-                                                        repos_url= gitInfo.getReposUrl();
+                                                        email = gitInfo.getEmail();
+                                                        avatar_url = gitInfo.getAvatarUrl();
+                                                        repos_url = gitInfo.getReposUrl();
                                                         location = gitInfo.getLocation();
+                                                        if (!openActivityFromApp) {
+                                                            name = gitInfo.getName();
+                                                        }
 
                                                         StudentDetailActivityGit.this.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            ((TextView) findViewById(R.id.repositoryGit)).setText(public_repos);
-                                                            ((TextView) findViewById(R.id.emailGit)).setText(email);
-                                                            ((TextView) findViewById(R.id.locationGit)).setText(location);
-                                                            ImageView imgView = (ImageView) findViewById(R.id.imageViewGit);
+                                                            @Override
+                                                            public void run() {
+//                                                            ((TextView) findViewById(R.id.repositoryGit)).setText(public_repos);
+                                                                if (!openActivityFromApp) {
+                                                                    openGit.setOnClickListener(new View.OnClickListener() {
+                                                                        @Override
+                                                                        public void onClick(View view) {
+                                                                            StudentDetailActivityGit.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/" + login)));
+                                                                        }
+                                                                    });
+
+                                                                }else{
+                                                                    openGit.setOnClickListener(new View.OnClickListener() {
+                                                                        @Override
+                                                                        public void onClick(View view) {
+                                                                            StudentDetailActivityGit.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGit)));
+                                                                        }
+                                                                    });
+                                                                }
+                                                                openGit.setVisibility(View.VISIBLE);
+                                                                nameGit.setText(name);
+                                                                loginGit.setText("(" + login + ")");
+                                                                emailGit.setText(email);
+                                                                locationGit.setText(location);
 //                                                            ((TextView) findViewById(R.id.email)).setText(email);
 //                                                            Picasso.with(StudentDetailActivityGit.this).load(avatar_url).into(imgView);
 //                                                            Picasso.with(StudentDetailActivityGit.this).load(avatar_url).fit().into(imgView);
-                                                            Transformation transformation = new RoundedTransformationBuilder()
-                                                                    .borderColor(Color.BLACK)
-                                                                    .borderWidthDp(3)
-                                                                    .cornerRadiusDp(30)
-                                                                    .oval(false)
-                                                                    .build();
+                                                                Transformation transformation = new RoundedTransformationBuilder()
+                                                                        .borderColor(Color.BLACK)
+                                                                        .borderWidthDp(3)
+                                                                        .cornerRadiusDp(30)
+                                                                        .oval(false)
+                                                                        .build();
 
-                                                            Picasso.with(StudentDetailActivityGit.this)
-                                                                    .load(avatar_url)
-                                                                    .fit()
-                                                                    .transform(transformation)
-                                                                    .into(imgView);
-                                                        }
-                                                    });
+                                                                Picasso.with(StudentDetailActivityGit.this)
+                                                                        .load(avatar_url)
+                                                                        .fit()
+                                                                        .transform(transformation)
+                                                                        .into(imgView);
+                                                            }
+                                                        });
 //
 //
                                                     }
 
 //
+                                                } else{
+                                                    StudentDetailActivityGit.this.runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            openGit.setVisibility(View.INVISIBLE);
+                                                            errorGit.setVisibility(View.VISIBLE);
+                                                        }
+                                                    });
+
                                                 }
                                             }
                                         }
@@ -138,4 +187,21 @@ public class StudentDetailActivityGit extends AppCompatActivity {
         );
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (!openActivityFromApp) {
+            finish();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
 }

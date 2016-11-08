@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -35,38 +36,56 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
     String circle;
     String imageUrl;
 
+    Boolean openActivityFromApp;
+
+    TextView nameGoogle, birthdayGoogle, gendrGoogle, errorGoogle;
+    Button openGoogle;
+    ImageView imgView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_detail_google);
 
+        nameGoogle = (TextView) findViewById(R.id.NameGoogle);
+        birthdayGoogle = (TextView) findViewById(R.id.birthdayGogole);
+        gendrGoogle = (TextView) findViewById(R.id.genderGoogle);
+        errorGoogle = (TextView) findViewById(R.id.ErrorGoogle);
+        openGoogle = (Button) findViewById(R.id.detailGoogle);
+        imgView = (ImageView) findViewById(R.id.imageViewGoogle);
+
+
+        id = "";
+
         Intent intent = this.getIntent();
         if (intent != null && intent.hasExtra("Name") && intent.hasExtra("ID") && intent.hasExtra("LinkToGoogle")) {
+            openActivityFromApp = true;
             name = intent.getStringExtra("Name");
             id = intent.getStringExtra("ID");
             linkToGoogle = intent.getStringExtra("LinkToGoogle");
-
-            ((TextView) findViewById(R.id.NameGoogle)).setText(name);
-
-            Button openGoogle = (Button) findViewById(R.id.detailGoogle);
-            openGoogle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    StudentDetailActivityGoogle.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGoogle)));
+        } else {
+            if (intent != null) {
+                openActivityFromApp = false;
+                String[] arrayMessage = intent.getData().getPath().split("/");
+                if (arrayMessage.length > 3) {
+                    id = arrayMessage[3];
                 }
-            });
-
+            }
         }
-        try {
-            doGetRequest(id);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (id.length() > 0) {
+            try {
+                doGetRequest(id);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            errorGoogle.setVisibility(View.VISIBLE);
         }
     }
 
     void doGetRequest(String... params) throws IOException {
 
-        final String BASE_URL = "https://www.googleapis.com/plus/v1/people/" + params[0]+"?key="+BuildConfig.GOOGLE_API_KEY;
+        final String BASE_URL = "https://www.googleapis.com/plus/v1/people/" + params[0] + "?key=" + BuildConfig.GOOGLE_API_KEY;
 
         URL url = new URL(BASE_URL);
 
@@ -94,18 +113,38 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
                                                     if (googleInfo != null) {
                                                         int k = 0;
                                                         birthday = googleInfo.getBirthday();
-                                                        gender =  googleInfo.getGender();
+                                                        gender = googleInfo.getGender();
                                                         String urlWithParam = googleInfo.getImage().getUrl();
-                                                        imageUrl=urlWithParam.substring(0,urlWithParam.lastIndexOf("?"))+"?sz=200";
+                                                        imageUrl = urlWithParam.substring(0, urlWithParam.lastIndexOf("?")) + "?sz=200";
+                                                        if (!openActivityFromApp) {
+                                                            name = googleInfo.getDisplayName();
+                                                        }
+
 
                                                         circle = googleInfo.getCircledByCount();
                                                         StudentDetailActivityGoogle.this.runOnUiThread(new Runnable() {
                                                             @Override
                                                             public void run() {
-                                                                ((TextView) findViewById(R.id.birthdayGogole)).setText(birthday);
-                                                                ((TextView) findViewById(R.id.genderGoogle)).setText(gender);
-                                                                ((TextView) findViewById(R.id.circleGoogle)).setText(circle);
-                                                                ImageView imgView = (ImageView) findViewById(R.id.imageViewGoogle);
+                                                                nameGoogle.setText(name);
+                                                                if (!openActivityFromApp) {
+                                                                    openGoogle.setOnClickListener(new View.OnClickListener() {
+                                                                        @Override
+                                                                        public void onClick(View view) {
+                                                                            StudentDetailActivityGoogle.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://plus.google.com/u/0/" + id)));
+                                                                        }
+                                                                    });
+                                                                } else {
+                                                                    openGoogle.setOnClickListener(new View.OnClickListener() {
+                                                                        @Override
+                                                                        public void onClick(View view) {
+                                                                            StudentDetailActivityGoogle.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGoogle)));
+                                                                        }
+                                                                    });
+                                                                }
+                                                                openGoogle.setVisibility(View.VISIBLE);
+                                                                birthdayGoogle.setText(birthday);
+                                                                gendrGoogle.setText(gender);
+//                                                                ((TextView) findViewById(R.id.circleGoogle)).setText(circle);
 //                                                            ((TextView) findViewById(R.id.email)).setText(email);
 //                                                            Picasso.with(StudentDetailActivityGit.this).load(avatar_url).into(imgView);
 //                                                                Picasso.with(StudentDetailActivityGoogle.this).load(imageUrl).fit().into(imgView);
@@ -128,10 +167,36 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
                                                     }
 
 //
+                                                } else {
+                                                    StudentDetailActivityGoogle.this.runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            openGoogle.setVisibility(View.INVISIBLE);
+                                                            errorGoogle.setVisibility(View.VISIBLE);
+                                                        }
+                                                    });
                                                 }
                                             }
                                         }
 
         );
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (!openActivityFromApp) {
+            finish();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }
