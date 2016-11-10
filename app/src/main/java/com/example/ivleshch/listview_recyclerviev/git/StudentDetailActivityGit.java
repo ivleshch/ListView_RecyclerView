@@ -1,6 +1,7 @@
 package com.example.ivleshch.listview_recyclerviev.git;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,7 +12,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ivleshch.listview_recyclerviev.data.MyApplication;
 import com.example.ivleshch.listview_recyclerviev.R;
+import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
 import com.google.gson.Gson;
 import com.makeramen.roundedimageview.RoundedTransformationBuilder;
 import com.squareup.okhttp.Callback;
@@ -37,10 +40,12 @@ public class StudentDetailActivityGit extends AppCompatActivity {
 
     Boolean openActivityFromApp;
 
-    TextView nameGit,loginGit,errorGit,emailGit,locationGit;
+    TextView nameGit, loginGit, errorGit, emailGit, locationGit;
     Button openGit;
     ImageView imgView;
 
+    private IntentFilter receiverFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+    private Receivers receiver = new Receivers();
 
 
     @Override
@@ -56,8 +61,9 @@ public class StudentDetailActivityGit extends AppCompatActivity {
         locationGit = (TextView) findViewById(R.id.locationGit);
         imgView = (ImageView) findViewById(R.id.imageViewGit);
 
-        login = "";
 
+
+        login = "";
         Intent intent = this.getIntent();
         if (intent != null && intent.hasExtra("Name") && intent.hasExtra("Login") && intent.hasExtra("LinkToGit")) {
             openActivityFromApp = true;
@@ -73,15 +79,31 @@ public class StudentDetailActivityGit extends AppCompatActivity {
                 }
             }
         }
-        if (login.length()>0) {
+        if (login.length() > 0) {
             try {
                 doGetRequest(login);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else{
+        } else {
             errorGit.setVisibility(View.VISIBLE);
         }
+
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, receiverFilter);
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+        MyApplication.activityPaused();
     }
 
 
@@ -136,7 +158,7 @@ public class StudentDetailActivityGit extends AppCompatActivity {
                                                                         }
                                                                     });
 
-                                                                }else{
+                                                                } else {
                                                                     openGit.setOnClickListener(new View.OnClickListener() {
                                                                         @Override
                                                                         public void onClick(View view) {
@@ -164,6 +186,7 @@ public class StudentDetailActivityGit extends AppCompatActivity {
                                                                         .fit()
                                                                         .transform(transformation)
                                                                         .into(imgView);
+
                                                             }
                                                         });
 //
@@ -171,7 +194,7 @@ public class StudentDetailActivityGit extends AppCompatActivity {
                                                     }
 
 //
-                                                } else{
+                                                } else {
                                                     StudentDetailActivityGit.this.runOnUiThread(new Runnable() {
                                                         @Override
                                                         public void run() {
@@ -186,6 +209,9 @@ public class StudentDetailActivityGit extends AppCompatActivity {
 
         );
     }
+
+
+
 
     @Override
     public void onBackPressed() {

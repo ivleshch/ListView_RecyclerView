@@ -1,6 +1,7 @@
 package com.example.ivleshch.listview_recyclerviev.google;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ivleshch.listview_recyclerviev.BuildConfig;
+import com.example.ivleshch.listview_recyclerviev.data.MyApplication;
 import com.example.ivleshch.listview_recyclerviev.R;
+import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
 import com.google.gson.Gson;
 import com.makeramen.roundedimageview.RoundedTransformationBuilder;
 import com.squareup.okhttp.Callback;
@@ -41,6 +44,9 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
     TextView nameGoogle, birthdayGoogle, gendrGoogle, errorGoogle;
     Button openGoogle;
     ImageView imgView;
+
+    private IntentFilter receiverFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+    private Receivers receiver = new Receivers();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +87,20 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
         } else {
             errorGoogle.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, receiverFilter );
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+        MyApplication.activityPaused();
     }
 
     void doGetRequest(String... params) throws IOException {

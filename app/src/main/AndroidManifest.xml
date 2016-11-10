@@ -2,61 +2,85 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.ivleshch.listview_recyclerviev">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".data.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".listview.ListViewActivity"
             android:screenOrientation="portrait">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
         </activity>
         <activity
             android:name=".recyclerview.RecyclerViewActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".git.StudentDetailActivityGit"
-            android:parentActivityName=".listview.ListViewActivity"
+            android:parentActivityName=".data.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="github.com" android:scheme="https"/>
-                <data android:host="github.com" android:scheme="http"/>
-
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="github.com"
+                    android:scheme="https" />
+                <data
+                    android:host="github.com"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
         <activity
             android:name=".google.StudentDetailActivityGoogle"
-            android:parentActivityName=".recyclerview.RecyclerViewActivity"
-            android:screenOrientation="portrait" >
+            android:parentActivityName=".data.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="plus.google.com" android:scheme="https"/>
-                <data android:host="plus.google.com" android:scheme="http"/>
-
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="plus.google.com"
+                    android:scheme="https" />
+                <data
+                    android:host="plus.google.com"
+                    android:scheme="http" />
             </intent-filter>
-
         </activity>
-        <activity android:name=".data.MainActivity"
+        <activity
+            android:name=".data.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".data.PickGetImageActivity"
+            android:parentActivityName=".data.MainActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+
+        <receiver
+            android:name=".broadcastreceivers.Receivers"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
+
+
     </application>
 
 </manifest>

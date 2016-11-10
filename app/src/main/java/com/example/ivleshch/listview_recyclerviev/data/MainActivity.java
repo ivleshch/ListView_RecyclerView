@@ -1,11 +1,16 @@
 package com.example.ivleshch.listview_recyclerviev.data;
 
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.SwitchCompat;
+import android.view.View;
 import android.widget.CompoundButton;
 
 import com.example.ivleshch.listview_recyclerviev.R;
+import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
 import com.example.ivleshch.listview_recyclerviev.listview.ListViewActivity;
 import com.example.ivleshch.listview_recyclerviev.recyclerview.RecyclerViewActivity;
 
@@ -16,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
     private ListViewActivity listViewActivity = new ListViewActivity();
     private RecyclerViewActivity recyclerViewActivity = new RecyclerViewActivity();
     private SwitchCompat switchChange;
+    private IntentFilter receiverFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+    private Receivers receiver = new Receivers();
+    private AppCompatButton buttonPickGet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +38,16 @@ public class MainActivity extends AppCompatActivity {
 
 
         switchChange = (SwitchCompat)findViewById(R.id.switchcompat);
+
+        buttonPickGet = (AppCompatButton) findViewById(R.id.PickGetImage);
+
+        buttonPickGet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, PickGetImageActivity.class);
+                startActivity(intent);
+            }
+        });
 
         switchChange.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -49,7 +67,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, receiverFilter );
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+        MyApplication.activityPaused();
     }
 
     @Override
