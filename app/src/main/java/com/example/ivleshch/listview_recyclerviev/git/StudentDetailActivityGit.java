@@ -45,7 +45,7 @@ public class StudentDetailActivityGit extends AppCompatActivity {
     ImageView imgView;
 
     private IntentFilter receiverFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-    private Receivers receiver = new Receivers();
+    private Receivers receiver;
 
 
     @Override
@@ -95,6 +95,7 @@ public class StudentDetailActivityGit extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        receiver = new Receivers();
         registerReceiver(receiver, receiverFilter);
         MyApplication.activityResumed();
     }

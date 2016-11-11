@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerViewActivity recyclerViewActivity = new RecyclerViewActivity();
     private SwitchCompat switchChange;
     private IntentFilter receiverFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-    private Receivers receiver = new Receivers();
+    private Receivers receiver;
     private AppCompatButton buttonPickGet;
 
     @Override
@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        receiver = new Receivers();
         registerReceiver(receiver, receiverFilter );
         MyApplication.activityResumed();
     }
