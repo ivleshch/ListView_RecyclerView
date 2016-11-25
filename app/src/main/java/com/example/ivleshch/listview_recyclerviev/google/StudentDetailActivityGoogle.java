@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -13,20 +14,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ivleshch.listview_recyclerviev.BuildConfig;
-import com.example.ivleshch.listview_recyclerviev.data.MyApplication;
 import com.example.ivleshch.listview_recyclerviev.R;
 import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
-import com.google.gson.Gson;
+import com.example.ivleshch.listview_recyclerviev.data.MyApplication;
+import com.example.ivleshch.listview_recyclerviev.google.data.GoogleModel;
+import com.example.ivleshch.listview_recyclerviev.google.data.GoogleService;
 import com.makeramen.roundedimageview.RoundedTransformationBuilder;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 import java.io.IOException;
-import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class StudentDetailActivityGoogle extends AppCompatActivity {
 
@@ -36,7 +41,7 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
 
     String gender;
     String birthday;
-    String circle;
+    int circle;
     String imageUrl;
 
     Boolean openActivityFromApp;
@@ -44,6 +49,8 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
     TextView nameGoogle, birthdayGoogle, gendrGoogle, errorGoogle;
     Button openGoogle;
     ImageView imgView;
+
+    public final static String API = "https://www.googleapis.com";
 
     private IntentFilter receiverFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
     private Receivers receiver;
@@ -93,7 +100,7 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         receiver = new Receivers();
-        registerReceiver(receiver, receiverFilter );
+        registerReceiver(receiver, receiverFilter);
         MyApplication.activityResumed();
     }
 
@@ -108,100 +115,87 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
 
         final String BASE_URL = "https://www.googleapis.com/plus/v1/people/" + params[0] + "?key=" + BuildConfig.GOOGLE_API_KEY;
 
-        URL url = new URL(BASE_URL);
+        OkHttpClient.Builder builderHttp = new OkHttpClient.Builder();
+        builderHttp.readTimeout(15, TimeUnit.SECONDS);
+        builderHttp.writeTimeout(15, TimeUnit.SECONDS);
+        OkHttpClient client = builderHttp.build();
 
-
-        Request request = new Request.Builder()
-                .url(url)
+        Retrofit retrofit= new Retrofit.Builder()
+                .baseUrl(API)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
                 .build();
 
-        OkHttpClient client = new OkHttpClient();
-        client.newCall(request).enqueue(new Callback() {
-                                            @Override
-                                            public void onFailure(Request request, IOException e) {
-
-                                            }
-
-                                            @Override
-                                            public void onResponse(Response response) throws IOException {
-
-                                                if (response.isSuccessful()) {
-                                                    String res = response.body().string();
-
-                                                    Gson gson = new Gson();
-                                                    GoogleInfoData googleInfo = gson.fromJson(res, GoogleInfoData.class);
-
-                                                    if (googleInfo != null) {
-                                                        int k = 0;
-                                                        birthday = googleInfo.getBirthday();
-                                                        gender = googleInfo.getGender();
-                                                        String urlWithParam = googleInfo.getImage().getUrl();
-                                                        imageUrl = urlWithParam.substring(0, urlWithParam.lastIndexOf("?")) + "?sz=200";
-                                                        if (!openActivityFromApp) {
-                                                            name = googleInfo.getDisplayName();
-                                                        }
 
 
-                                                        circle = googleInfo.getCircledByCount();
-                                                        StudentDetailActivityGoogle.this.runOnUiThread(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-                                                                nameGoogle.setText(name);
-                                                                if (!openActivityFromApp) {
-                                                                    openGoogle.setOnClickListener(new View.OnClickListener() {
-                                                                        @Override
-                                                                        public void onClick(View view) {
-                                                                            StudentDetailActivityGoogle.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://plus.google.com/u/0/" + id)));
-                                                                        }
-                                                                    });
-                                                                } else {
-                                                                    openGoogle.setOnClickListener(new View.OnClickListener() {
-                                                                        @Override
-                                                                        public void onClick(View view) {
-                                                                            StudentDetailActivityGoogle.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGoogle)));
-                                                                        }
-                                                                    });
-                                                                }
-                                                                openGoogle.setVisibility(View.VISIBLE);
-                                                                birthdayGoogle.setText(birthday);
-                                                                gendrGoogle.setText(gender);
-//                                                                ((TextView) findViewById(R.id.circleGoogle)).setText(circle);
-//                                                            ((TextView) findViewById(R.id.email)).setText(email);
-//                                                            Picasso.with(StudentDetailActivityGit.this).load(avatar_url).into(imgView);
-//                                                                Picasso.with(StudentDetailActivityGoogle.this).load(imageUrl).fit().into(imgView);
-                                                                Transformation transformation = new RoundedTransformationBuilder()
-                                                                        .borderColor(Color.BLACK)
-                                                                        .borderWidthDp(3)
-                                                                        .cornerRadiusDp(30)
-                                                                        .oval(false)
-                                                                        .build();
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .baseUrl(API)
+//                .build();
 
-                                                                Picasso.with(StudentDetailActivityGoogle.this)
-                                                                        .load(imageUrl)
-                                                                        .fit()
-                                                                        .transform(transformation)
-                                                                        .into(imgView);
-                                                            }
-                                                        });
-//
-//
-                                                    }
+        GoogleService service = retrofit.create(GoogleService.class);
+        Call<GoogleModel> call = service.getUser(params[0], BuildConfig.GOOGLE_API_KEY);
 
-//
-                                                } else {
-                                                    StudentDetailActivityGoogle.this.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            openGoogle.setVisibility(View.INVISIBLE);
-                                                            errorGoogle.setVisibility(View.VISIBLE);
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        }
+        call.enqueue(new Callback<GoogleModel>() {
+            @Override
+            public void onResponse(Call<GoogleModel> call, Response<GoogleModel> response) {
+                if (response.isSuccessful()) {
+                    birthday = response.body().getBirthday();
+                    gender = response.body().getGender();
+                    String urlWithParam = response.body().getImage().getUrl();
+                    imageUrl = urlWithParam.substring(0, urlWithParam.lastIndexOf("?")) + "?sz=200";
+                    if (!openActivityFromApp) {
+                        name = response.body().getDisplayName();
+                    }
 
-        );
+                    circle = response.body().getCircledByCount();
+                    nameGoogle.setText(name);
+                    if (!openActivityFromApp) {
+                        openGoogle.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                StudentDetailActivityGoogle.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://plus.google.com/u/0/" + id)));
+                            }
+                        });
+                    } else {
+                        openGoogle.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                StudentDetailActivityGoogle.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGoogle)));
+                            }
+                        });
+                    }
+                    openGoogle.setVisibility(View.VISIBLE);
+                    birthdayGoogle.setText(birthday);
+                    gendrGoogle.setText(gender);
+                    Transformation transformation = new RoundedTransformationBuilder()
+                            .borderColor(Color.BLACK)
+                            .borderWidthDp(3)
+                            .cornerRadiusDp(30)
+                            .oval(false)
+                            .build();
+
+                    Picasso.with(StudentDetailActivityGoogle.this)
+                            .load(imageUrl)
+                            .fit()
+                            .transform(transformation)
+                            .into(imgView);
+                } else {
+                    openGoogle.setVisibility(View.INVISIBLE);
+                    errorGoogle.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GoogleModel> call, Throwable t) {
+                Log.d("Logivleshch", t.toString());
+            }
+        });
+
+
     }
+
 
     @Override
     public void onBackPressed() {

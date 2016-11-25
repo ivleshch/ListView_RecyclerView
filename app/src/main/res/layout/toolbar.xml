@@ -24,17 +24,16 @@
         app:switchMinWidth="100dp"
         android:layout_weight="3"/>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/PickGetImage"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:text = "@string/PickGetImage"
-        android:background="@drawable/mybutton"
-        android:textColor="@android:color/white"
-        android:padding="10dp">
+    <!--<android.support.v7.widget.AppCompatButton-->
+        <!--android:id="@+id/PickGetImage"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="50dp"-->
+        <!--android:text = "@string/PickGetImage"-->
+        <!--android:background="@drawable/mybutton"-->
+        <!--android:textColor="@android:color/white"-->
+        <!--android:padding="10dp">-->
 
-    </android.support.v7.widget.AppCompatButton>
-
+    <!--</android.support.v7.widget.AppCompatButton>-->
 
 </android.support.v7.widget.LinearLayoutCompat>
 

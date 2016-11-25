@@ -34,9 +34,23 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     compile 'com.yqritc:recyclerview-flexibledivider:1.4.0'
 
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
-    compile 'com.google.code.gson:gson:2.2.+'
-    compile 'com.squareup.picasso:picasso:2.5.2'
+//    compile 'com.squareup.okhttp:okhttp:2.5.0'
+//    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+//    compile 'com.google.code.gson:gson:2.2.+'
+
     compile 'com.makeramen:roundedimageview:2.2.1'
-}
+
+    compile('com.squareup.retrofit2:retrofit:2.0.2') {
+        // exclude Retrofit’s OkHttp peer-dependency module and define your own module import
+        exclude module: 'okhttp'
+    }
+    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
+    compile 'com.squareup.okhttp3:okhttp:3.3.1'
+    // Picasso
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
+
+
+
+
+    }

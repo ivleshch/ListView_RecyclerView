@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.SwitchCompat;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.CompoundButton;
 
 import com.example.ivleshch.listview_recyclerviev.R;
 import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
+import com.example.ivleshch.listview_recyclerviev.contacts.ContactsViewActivity;
 import com.example.ivleshch.listview_recyclerviev.listview.ListViewActivity;
 import com.example.ivleshch.listview_recyclerviev.recyclerview.RecyclerViewActivity;
 
@@ -26,6 +28,12 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatButton buttonPickGet;
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -39,15 +47,15 @@ public class MainActivity extends AppCompatActivity {
 
         switchChange = (SwitchCompat)findViewById(R.id.switchcompat);
 
-        buttonPickGet = (AppCompatButton) findViewById(R.id.PickGetImage);
+//        buttonPickGet = (AppCompatButton) findViewById(R.id.PickGetImage);
 
-        buttonPickGet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, PickGetImageActivity.class);
-                startActivity(intent);
-            }
-        });
+//        buttonPickGet.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(MainActivity.this, PickGetImageActivity.class);
+//                startActivity(intent);
+//            }
+//        });
 
         switchChange.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -67,6 +75,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.pick_get_image) {
+            Intent intent = new Intent(MainActivity.this, PickGetImageActivity.class);
+            startActivity(intent);
+
+            return true;
+        }
+        if (id == R.id.contacts) {
+            Intent intent = new Intent(MainActivity.this, ContactsViewActivity.class);
+            startActivity(intent);
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

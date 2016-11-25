@@ -6,26 +6,32 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.ivleshch.listview_recyclerviev.data.MyApplication;
 import com.example.ivleshch.listview_recyclerviev.R;
 import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
-import com.google.gson.Gson;
+import com.example.ivleshch.listview_recyclerviev.data.MyApplication;
+import com.example.ivleshch.listview_recyclerviev.git.data.GitHubService;
+import com.example.ivleshch.listview_recyclerviev.git.data.GitModel;
 import com.makeramen.roundedimageview.RoundedTransformationBuilder;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 import java.io.IOException;
-import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class StudentDetailActivityGit extends AppCompatActivity {
     String name;
@@ -37,6 +43,7 @@ public class StudentDetailActivityGit extends AppCompatActivity {
     String avatar_url;
     String repos_url;
     String location;
+    public final static String API = "https://api.github.com";
 
     Boolean openActivityFromApp;
 
@@ -60,7 +67,6 @@ public class StudentDetailActivityGit extends AppCompatActivity {
         emailGit = (TextView) findViewById(R.id.emailGit);
         locationGit = (TextView) findViewById(R.id.locationGit);
         imgView = (ImageView) findViewById(R.id.imageViewGit);
-
 
 
         login = "";
@@ -88,7 +94,6 @@ public class StudentDetailActivityGit extends AppCompatActivity {
         } else {
             errorGit.setVisibility(View.VISIBLE);
         }
-
     }
 
 
@@ -108,110 +113,89 @@ public class StudentDetailActivityGit extends AppCompatActivity {
     }
 
 
-    void doGetRequest(String... params) throws IOException {
+    private void doGetRequest(String... params) throws IOException {
 
         final String BASE_URL = "http://api.github.com/users/" + params[0];
 
-        //Uri builtUri = Uri.parse(BASE_URL).buildUpon().build();
-        URL url = new URL(BASE_URL);
 
+        OkHttpClient.Builder builderHttp = new OkHttpClient.Builder();
+        builderHttp.readTimeout(15, TimeUnit.SECONDS);
+        builderHttp.writeTimeout(15, TimeUnit.SECONDS);
+        OkHttpClient client = builderHttp.build();
 
-        Request request = new Request.Builder()
-                .url(url)
+        Retrofit retrofit= new Retrofit.Builder()
+                .baseUrl(API)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
                 .build();
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .baseUrl(API)
+//                .build();
 
-        OkHttpClient client = new OkHttpClient();
-        client.newCall(request).enqueue(new Callback() {
-                                            @Override
-                                            public void onFailure(Request request, IOException e) {
+        GitHubService service = retrofit.create(GitHubService.class);
+//        Observable<GitModel> githubUser = service.getUser("ivleshch");
+        Call<GitModel> call = service.getUser(params[0]);
+        call.enqueue(new Callback<GitModel>() {
+            @Override
+            public void onResponse(Call<GitModel> call, Response<GitModel> response) {
+                if (response.isSuccessful()) {
+                    public_repos = response.body().getName();
+                    email = response.body().getEmail();
+                    avatar_url = response.body().getAvatarUrl();
+                    repos_url = response.body().getReposUrl();
+                    location = response.body().getLocation();
+                    if (!openActivityFromApp) {
+                        name = response.body().getName();
+                    }
+                    if (!openActivityFromApp) {
+                        openGit.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                StudentDetailActivityGit.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/" + login)));
+                            }
+                        });
 
-                                            }
+                    } else {
+                        openGit.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                StudentDetailActivityGit.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGit)));
+                            }
+                        });
+                    }
+                    openGit.setVisibility(View.VISIBLE);
+                    nameGit.setText(name);
+                    loginGit.setText("(" + login + ")");
+                    emailGit.setText(email);
+                    locationGit.setText(location);
+                    Transformation transformation = new RoundedTransformationBuilder()
+                            .borderColor(Color.BLACK)
+                            .borderWidthDp(3)
+                            .cornerRadiusDp(30)
+                            .oval(false)
+                            .build();
 
-                                            @Override
-                                            public void onResponse(Response response) throws IOException {
+                    Picasso.with(StudentDetailActivityGit.this)
+                            .load(avatar_url)
+                            .fit()
+                            .transform(transformation)
+                            .into(imgView);
+                } else {
+                    openGit.setVisibility(View.INVISIBLE);
+                    errorGit.setVisibility(View.VISIBLE);
+                }
+            }
 
-                                                if (response.isSuccessful()) {
-                                                    String res = response.body().string();
+            @Override
+            public void onFailure(Call<GitModel> call, Throwable t) {
+                Log.d("Logivleshch", t.toString());
+            }
 
-                                                    Gson gson = new Gson();
-                                                    GitInfo gitInfo = gson.fromJson(res, GitInfo.class);
 
-                                                    if (gitInfo != null) {
-
-                                                        public_repos = gitInfo.getPublicRepos();
-                                                        email = gitInfo.getEmail();
-                                                        avatar_url = gitInfo.getAvatarUrl();
-                                                        repos_url = gitInfo.getReposUrl();
-                                                        location = gitInfo.getLocation();
-                                                        if (!openActivityFromApp) {
-                                                            name = gitInfo.getName();
-                                                        }
-
-                                                        StudentDetailActivityGit.this.runOnUiThread(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-//                                                            ((TextView) findViewById(R.id.repositoryGit)).setText(public_repos);
-                                                                if (!openActivityFromApp) {
-                                                                    openGit.setOnClickListener(new View.OnClickListener() {
-                                                                        @Override
-                                                                        public void onClick(View view) {
-                                                                            StudentDetailActivityGit.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/" + login)));
-                                                                        }
-                                                                    });
-
-                                                                } else {
-                                                                    openGit.setOnClickListener(new View.OnClickListener() {
-                                                                        @Override
-                                                                        public void onClick(View view) {
-                                                                            StudentDetailActivityGit.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkToGit)));
-                                                                        }
-                                                                    });
-                                                                }
-                                                                openGit.setVisibility(View.VISIBLE);
-                                                                nameGit.setText(name);
-                                                                loginGit.setText("(" + login + ")");
-                                                                emailGit.setText(email);
-                                                                locationGit.setText(location);
-//                                                            ((TextView) findViewById(R.id.email)).setText(email);
-//                                                            Picasso.with(StudentDetailActivityGit.this).load(avatar_url).into(imgView);
-//                                                            Picasso.with(StudentDetailActivityGit.this).load(avatar_url).fit().into(imgView);
-                                                                Transformation transformation = new RoundedTransformationBuilder()
-                                                                        .borderColor(Color.BLACK)
-                                                                        .borderWidthDp(3)
-                                                                        .cornerRadiusDp(30)
-                                                                        .oval(false)
-                                                                        .build();
-
-                                                                Picasso.with(StudentDetailActivityGit.this)
-                                                                        .load(avatar_url)
-                                                                        .fit()
-                                                                        .transform(transformation)
-                                                                        .into(imgView);
-
-                                                            }
-                                                        });
-//
-//
-                                                    }
-
-//
-                                                } else {
-                                                    StudentDetailActivityGit.this.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            openGit.setVisibility(View.INVISIBLE);
-                                                            errorGit.setVisibility(View.VISIBLE);
-                                                        }
-                                                    });
-
-                                                }
-                                            }
-                                        }
-
-        );
+        });
     }
-
-
 
 
     @Override

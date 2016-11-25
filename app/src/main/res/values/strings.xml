@@ -20,4 +20,15 @@
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="cancel">Cancel</string>
+
+    <string name="PickGetImageTitle">Pick / Get image</string>
+    <string name="Contacts">Contacts</string>
+
+    <string name="itemRecyclerView">Recycler view</string>
+    <string name="itemListView">List view</string>
+
+    <string name="hintName">Input name</string>
+    <string name="hintNumber">Input number</string>
+    <string name="buttonAdd">Add</string>
+
 </resources>
