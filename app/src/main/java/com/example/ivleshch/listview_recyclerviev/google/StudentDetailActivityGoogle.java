@@ -90,7 +90,7 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
                 doGetRequest(id);
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+           }
         } else {
             errorGoogle.setVisibility(View.VISIBLE);
         }
@@ -111,7 +111,7 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
         MyApplication.activityPaused();
     }
 
-    void doGetRequest(String... params) throws IOException {
+    void doGetRequest(String... params) throws IOException{
 
         final String BASE_URL = "https://www.googleapis.com/plus/v1/people/" + params[0] + "?key=" + BuildConfig.GOOGLE_API_KEY;
 
@@ -119,6 +119,19 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
         builderHttp.readTimeout(15, TimeUnit.SECONDS);
         builderHttp.writeTimeout(15, TimeUnit.SECONDS);
         OkHttpClient client = builderHttp.build();
+
+//        final Gson gson = new GsonBuilder()
+//                .setExclusionStrategies(new ExclusionStrategy() {
+//                    @Override
+//                    public boolean shouldSkipField(FieldAttributes f) {
+//                        return f.getDeclaringClass().equals(GoogleModel.class);
+//                    }
+//                    @Override
+//                    public boolean shouldSkipClass(Class<?> clazz) {
+//                        return false;
+//                    }
+//                })
+//                .create();
 
         Retrofit retrofit= new Retrofit.Builder()
                 .baseUrl(API)
@@ -140,7 +153,13 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
         call.enqueue(new Callback<GoogleModel>() {
             @Override
             public void onResponse(Call<GoogleModel> call, Response<GoogleModel> response) {
+
+                Log.v("Retrofit", "OnResponse!");
+
                 if (response.isSuccessful()) {
+
+                    Log.v("Retrofit", "Success!");
+
                     birthday = response.body().getBirthday();
                     gender = response.body().getGender();
                     String urlWithParam = response.body().getImage().getUrl();
@@ -182,9 +201,14 @@ public class StudentDetailActivityGoogle extends AppCompatActivity {
                             .transform(transformation)
                             .into(imgView);
                 } else {
+
+                    Log.v("Retrofit", "Not Success!");
+
                     openGoogle.setVisibility(View.INVISIBLE);
                     errorGoogle.setVisibility(View.VISIBLE);
                 }
+
+                Log.v("Retrofit", name + ":" + imageUrl);
             }
 
             @Override
