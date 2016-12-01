@@ -115,7 +115,7 @@ public class ContactsViewFragment extends Fragment {
             }
         });
 
-        contactsInformation = contactInformationPermision();
+        contactsInformation = contactInformation();
 
         recyclerView = (RecyclerView) view.findViewById(R.id.contactsList);
         adapter = new ContactsViewAdapter(getActivity(), contactsInformation);
@@ -151,13 +151,6 @@ public class ContactsViewFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                contactInformation();
-            } else {
-                Toast.makeText(getActivity(), "Need permission", Toast.LENGTH_SHORT).show();
-            }
-        }
         if (requestCode == PERMISSIONS_REQUEST_WRITE_CONTACTS) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 addContact();
@@ -201,16 +194,5 @@ public class ContactsViewFragment extends Fragment {
             }
         }
         return contactInformation;
-    }
-
-    public ArrayList contactInformationPermision() {
-        ArrayList contactinformation = new ArrayList();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            contactinformation = new ArrayList();
-        } else {
-            contactinformation = contactInformation();
-        }
-        return contactinformation;
     }
 }

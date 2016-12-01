@@ -1,7 +1,10 @@
 package com.example.ivleshch.listview_recyclerviev.data;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -9,6 +12,7 @@ import android.support.v7.widget.SwitchCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import com.example.ivleshch.listview_recyclerviev.R;
 import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
@@ -26,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private IntentFilter receiverFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
     private Receivers receiver;
     private AppCompatButton buttonPickGet;
+    private final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -88,12 +93,27 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         if (id == R.id.contacts) {
-            Intent intent = new Intent(MainActivity.this, ContactsViewActivity.class);
-            startActivity(intent);
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+            } else {
+                Intent intent = new Intent(MainActivity.this, ContactsViewActivity.class);
+                startActivity(intent);
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent(MainActivity.this, ContactsViewActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Need permission", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
