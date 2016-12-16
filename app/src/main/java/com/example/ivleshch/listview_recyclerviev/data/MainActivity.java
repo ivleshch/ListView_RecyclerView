@@ -6,12 +6,12 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.SwitchCompat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.example.ivleshch.listview_recyclerviev.R;
@@ -21,6 +21,12 @@ import com.example.ivleshch.listview_recyclerviev.listview.ListViewActivity;
 import com.example.ivleshch.listview_recyclerviev.recyclerview.RecyclerViewActivity;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private Receivers receiver;
     private AppCompatButton buttonPickGet;
     private final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    private Realm realm;
+    private ArrayList<StudentInformation> studentsInformation;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -43,43 +51,34 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        realm = Realm.getDefaultInstance();
+
+        studentsInformation = informationAboutStudents();
+
+//        final SearchView search = (SearchView) findViewById( R.id.search);
+//        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                Toast.makeText(search.getContext(), "1", Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                Toast.makeText(search.getContext(), "2", Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//        });
+//        search.setOnQueryTextListener(listener);
+//
+//        SearchView.OnQueryTextListener listener = new SearchView.OnQueryTextListener()
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_list_recycler, listViewActivity)
+                    .add(R.id.fragment_list_recycler, recyclerViewActivity)
                     .commit();
         }
 
-
-        switchChange = (SwitchCompat)findViewById(R.id.switchcompat);
-
-//        buttonPickGet = (AppCompatButton) findViewById(R.id.PickGetImage);
-
-//        buttonPickGet.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(MainActivity.this, PickGetImageActivity.class);
-//                startActivity(intent);
-//            }
-//        });
-
-        switchChange.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                if(checked){
-                    switchChange.setText(R.string.textSwitchRecyclerView);
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_list_recycler, recyclerViewActivity)
-                            .addToBackStack(null)
-                            .commit();
-                }else{
-                    switchChange.setText(R.string.textSwitchListView);
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_list_recycler, listViewActivity)
-                           .addToBackStack(null)
-                            .commit();
-                }
-            }
-        });
     }
 
     @Override
@@ -101,7 +100,32 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         }
+        if (id == R.id.fillBase) {
+            saveUsers(getDummyUsers());
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void saveUsers(final List<StudentInformationRealm> users) {
+        Realm realm = Realm.getDefaultInstance();
+
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.insertOrUpdate(users);
+            }
+        }, new Realm.Transaction.OnSuccess() {
+            @Override
+            public void onSuccess() {
+
+            }
+        }, new Realm.Transaction.OnError() {
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        });
     }
 
     @Override
@@ -134,7 +158,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        switchChange.setChecked(false);
+//        switchChange.setChecked(false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 
     public static ArrayList informationAboutStudents() {
@@ -161,4 +191,39 @@ public class MainActivity extends AppCompatActivity {
         studentsInformation.add(new StudentInformation("Павел Сакуров"         , "https://github.com/sakurov"           , "https://plus.google.com/u/0/108482088578879737406", "sakurov"        ,"108482088578879737406"));
         return studentsInformation;
     }
+
+    @NonNull
+    private List<StudentInformationRealm> getDummyUsers() {
+        final List<StudentInformationRealm> users = new ArrayList<>();
+
+        Iterator<StudentInformation> itr = studentsInformation.iterator();
+
+        int min = 0;
+        RealmResults<StudentInformationRealm> rawUsers = realm.where(StudentInformationRealm.class).findAllSorted("id", Sort.DESCENDING);
+        if (rawUsers.size() > 0) {
+            min = rawUsers.first().getId()+1;
+        }
+
+        while (itr.hasNext()) {
+            StudentInformation element = itr.next();
+
+            RealmResults<StudentInformationRealm> rawUsersList = realm.where(StudentInformationRealm.class).equalTo("idGoogle",element.getIdGoogle()).findAll();
+
+            if (rawUsersList.size() ==0) {
+                StudentInformationRealm user = new StudentInformationRealm();
+                user.setId(min);
+                user.setName(element.getName());
+                user.setLinkToGit(element.getLinkToGit());
+                user.setLinkToGoogle(element.getLinkToGoogle());
+                user.setGitLogin(element.getGitLogin());
+                user.setIdGoogle(element.getIdGoogle());
+                user.setSearchName(element.getName());
+
+                users.add(user);
+                min = min + 1;
+            }
+        }
+        return users;
+    }
+
 }

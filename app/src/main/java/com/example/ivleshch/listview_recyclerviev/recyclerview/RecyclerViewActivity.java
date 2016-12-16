@@ -4,25 +4,54 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ivleshch.listview_recyclerviev.R;
-import com.example.ivleshch.listview_recyclerviev.data.StudentInformation;
+import com.example.ivleshch.listview_recyclerviev.data.StudentInformationRealm;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
-import java.util.ArrayList;
-
-import static com.example.ivleshch.listview_recyclerviev.data.MainActivity.informationAboutStudents;
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * Created by Ivleshch on 27.10.2016.
  */
-public class RecyclerViewActivity extends Fragment{
+public class RecyclerViewActivity extends Fragment {
+
+    private RecyclerView rvUsers;
+    private Realm realm;
+
+    String nameDelete;
+    String linkToGitDelete;
+    String linkToGoogleDelete;
+    String gitLoginDelete;
+    String idGoogleDelete;
+    String searchNameDelete;
+
+
+    private final RealmChangeListener<RealmResults<StudentInformationRealm>> changeListener = new RealmChangeListener<RealmResults<StudentInformationRealm>>() {
+        @Override
+        public void onChange(RealmResults<StudentInformationRealm> elements) {
+            updateUI(elements);
+        }
+    };
+
+
+    private void updateUI(RealmResults<StudentInformationRealm> elements) {
+//        if (rvUsers.getAdapter() == null) {
+            rvUsers.setAdapter(new RecyclerViewAdapter(getActivity(), elements));
+//        } else {
+//            RecyclerViewAdapter adapter = (RecyclerViewAdapter) rvUsers.getAdapter();
+//            adapter.notifyDataSetChanged();
+//        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -33,42 +62,106 @@ public class RecyclerViewActivity extends Fragment{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final ArrayList<StudentInformation> studentsInformation = informationAboutStudents();
 
-        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.RecyclerView);
-        final RecyclerViewAdapter adapter = new RecyclerViewAdapter(getActivity(), studentsInformation);
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(adapter);
-
-        recyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity()).build());
-
-        ItemTouchHelper.SimpleCallback mIth = new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+        final SearchView search = (SearchView) view.findViewById( R.id.search);
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onMove(RecyclerView recyclerView,RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onQueryTextSubmit(String query) {
+//                Toast.makeText(search.getContext(), "45", Toast.LENGTH_SHORT).show();
                 return false;
             }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+//                RealmResults<StudentInformationRealm> users = realm.where(StudentInformationRealm.class)
+//                        .findAllAsync();
+                realm = Realm.getDefaultInstance();
+                RealmResults<StudentInformationRealm> users = realm.where(StudentInformationRealm.class)
+                        .beginGroup()
+                        .contains("searchName",newText)
+                        .or()
+                        .contains("name",newText)
+                        .endGroup()
+                        .findAllSorted("searchName");
+                users.addChangeListener(changeListener);
+                updateUI(users);
+
+//                Toast.makeText(search.getContext(), "47", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+
+
+        rvUsers = (RecyclerView) view.findViewById(R.id.RecyclerView);
+
+        realm = Realm.getDefaultInstance();
+
+        RealmResults<StudentInformationRealm> users = realm.where(StudentInformationRealm.class)
+                .findAllSortedAsync("searchName");
+        users.addChangeListener(changeListener);
+
+        rvUsers.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity()).build());
+
+        ItemTouchHelper.SimpleCallback mIth = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 final int fromPos = viewHolder.getAdapterPosition();
-                final StudentInformation studentInformation= studentsInformation.get(fromPos);
-                studentsInformation.remove(studentInformation);
-                adapter.notifyItemRemoved(fromPos);
+                String NameDelete = ((RecyclerViewAdapter.UserViewHolder) viewHolder).Name.getText().toString();
+                RealmResults<StudentInformationRealm> rawUsersList = realm.where(StudentInformationRealm.class).equalTo("name", NameDelete).findAll();
+                if (rawUsersList.size() != 0) {
+                    nameDelete = rawUsersList.first().getName();
+                    linkToGitDelete = rawUsersList.first().getLinkToGit();
+                    linkToGoogleDelete = rawUsersList.first().getLinkToGoogle();
+                    gitLoginDelete = rawUsersList.first().getGitLogin();
+                    idGoogleDelete = rawUsersList.first().getIdGoogle();
+                    searchNameDelete = rawUsersList.first().getSearchName();
 
+                    ;
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+                    rawUsersList.deleteAllFromRealm();
+                    realm.commitTransaction();
+                    realm.close();
+                }
 
-                Snackbar snackbar = Snackbar.make(recyclerView, studentInformation.getName() + " deleted", Snackbar.LENGTH_LONG);
+                Snackbar snackbar = Snackbar.make(rvUsers, nameDelete + " deleted", Snackbar.LENGTH_LONG);
                 snackbar.setAction("UNDO", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        studentsInformation.add(fromPos, studentInformation);
-                        adapter.notifyDataSetChanged();
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+
+                        //
+                        int min = 0;
+                        RealmResults<StudentInformationRealm> rawUsers = realm.where(StudentInformationRealm.class).findAllSorted("id", Sort.DESCENDING);
+                        if (rawUsers.size() > 0) {
+                            min = rawUsers.first().getId() + 1;
+                        }
+
+                        StudentInformationRealm user = new StudentInformationRealm();
+                        user.setId(min);
+                        user.setName(nameDelete);
+                        user.setLinkToGit(linkToGitDelete);
+                        user.setLinkToGoogle(linkToGoogleDelete);
+                        user.setGitLogin(gitLoginDelete);
+                        user.setIdGoogle(idGoogleDelete);
+                        user.setSearchName(searchNameDelete);
+
+                        realm.insertOrUpdate(user);
+                        realm.commitTransaction();
+                        realm.close();
                     }
+//
                 });
                 snackbar.show();
-
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(mIth);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
+        itemTouchHelper.attachToRecyclerView(rvUsers);
     }
 }

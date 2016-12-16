@@ -6,35 +6,14 @@
     android:layout_height="match_parent"
     android:background="#E8EAF6">
 
-    <!--<android.support.v7.widget.SwitchCompat-->
-        <!--android:layout_marginTop="2dp"-->
-        <!--android:layout_marginBottom="2dp"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:id="@+id/switchcompatRecyclerView"-->
-        <!--android:text="@string/textSwitchRecyclerView"-->
-        <!--android:background="@color/colorPrimary"-->
-        <!--android:textColor="@android:color/white"-->
-        <!--android:textStyle="bold"-->
-        <!--android:textSize="20sp"-->
-        <!--app:switchMinWidth="100dp"-->
-        <!--/>-->
-
-
-    <!--<Button-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="@string/textRecyclerView"-->
-        <!--android:id="@+id/button_recyclerview"-->
-        <!--android:onClick="OpenListViewActivity"-->
-        <!--android:textColor="@color/colorPrimary"-->
-        <!--android:layout_marginBottom="16dp"/>-->
+    <include layout="@layout/toolbar"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/RecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager">
     </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

@@ -31,4 +31,10 @@
     <string name="hintNumber">Input number</string>
     <string name="buttonAdd">Add</string>
 
+    <string name="RefreshBase">Fill base</string>
+
+    <string name="search_hint">Search</string>
+
+    search_hint
+
 </resources>

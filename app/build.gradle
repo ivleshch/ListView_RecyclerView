@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 24
@@ -49,6 +50,9 @@ dependencies {
 
     // Picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
+
+//    compile 'com.github.thorbenprimke:realm-searchview:0.9.6'
+
 
 
 

@@ -11,86 +11,87 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ivleshch.listview_recyclerviev.R;
-import com.example.ivleshch.listview_recyclerviev.data.StudentInformation;
+import com.example.ivleshch.listview_recyclerviev.data.StudentInformationRealm;
 import com.example.ivleshch.listview_recyclerviev.git.StudentDetailActivityGit;
 import com.example.ivleshch.listview_recyclerviev.google.StudentDetailActivityGoogle;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Ivleshch on 27.10.2016.
  */
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.CustomViewHolder> {
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.UserViewHolder> {
 
-    Context context;
-    ArrayList<StudentInformation> studentsInformation;
-    LayoutInflater inflater;
+    static private List<StudentInformationRealm> users;
+    private LayoutInflater inflater;
+    static private Context context;
 
-    public RecyclerViewAdapter(Context context, ArrayList<StudentInformation> studentsInformation) {
+    public RecyclerViewAdapter(Context context,List<StudentInformationRealm> users) {
+        this.users = users;
         this.context = context;
-        this.studentsInformation = studentsInformation;
-        inflater = LayoutInflater.from(context);
+        setHasStableIds(true);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return users.get(position).getId();
+    }
+
+    @Override
+    public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (inflater == null) {
+            inflater = LayoutInflater.from(parent.getContext());
+        }
+        return UserViewHolder.create(inflater, parent);
+    }
+
+    @Override
+    public void onBindViewHolder(UserViewHolder holder, int position) {
+        holder.bind(users.get(position));
+
     }
 
     @Override
     public int getItemCount() {
-        return studentsInformation.size();
+        return users == null ? 0 : users.size();
     }
 
-    @Override
-    public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.item_list_view, parent, false);
-        return new CustomViewHolder(view);
-    }
 
-    @Override
-    public void onBindViewHolder(CustomViewHolder holder, int position) {
-        final StudentInformation studentInformation = studentsInformation.get(position);
-        holder.Name.setText(studentInformation.getName());
-//        holder.linkToGit.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(studentInformation.getLinkToGit())));
-//            }
-//        });
-//
-//        holder.linearLayout.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(studentInformation.getLinkToGoogle())));
-//            }
-//        });
-    }
+    static class UserViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener{
+        public TextView Name;
+        private Button linkToGit;
+        private LinearLayout linearLayout;
 
-    class CustomViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener{
 
-        LinearLayout linearLayout;
-        TextView Name;
-        Button linkToGit;
+        public static UserViewHolder create(LayoutInflater inflater, ViewGroup parent) {
+            return new UserViewHolder(inflater.inflate(R.layout.item_list_view, parent, false));
+        }
 
-        CustomViewHolder(View itemView) {
+        private UserViewHolder(View itemView) {
             super(itemView);
-            linearLayout = (LinearLayout) itemView.findViewById(R.id.item);
             Name = (TextView) itemView.findViewById(R.id.Name);
             linkToGit = (Button) itemView.findViewById(R.id.Git);
+            linearLayout = (LinearLayout) itemView.findViewById(R.id.item);
+        }
 
+        public void bind(StudentInformationRealm user) {
+            Name.setText(user.getName());
             linkToGit.setOnClickListener(this);
             linearLayout.setOnClickListener(this);
+
         }
 
         @Override
         public void onClick(View view) {
-            StudentInformation studentInformation = studentsInformation.get(getAdapterPosition());
+            StudentInformationRealm studentInformation = users.get(getAdapterPosition());
 
             if (view.getId()==R.id.Git) {
-                //context.startActivity(new Intent(context, StudentDetailActivityGit.class));
                 Intent intent = new Intent(context, StudentDetailActivityGit.class)
                         .putExtra("Name", studentInformation.getName())
                         .putExtra("Login", studentInformation.getGitLogin())
                         .putExtra("LinkToGit", studentInformation.getLinkToGit())
                         ;
                 context.startActivity(intent);
-//                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(studentInformation.getLinkToGit())));
             }
             if (view.getId()==R.id.item) {
                 Intent intent = new Intent(context, StudentDetailActivityGoogle.class)
@@ -105,7 +106,5 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
     }
-
-
 }
 

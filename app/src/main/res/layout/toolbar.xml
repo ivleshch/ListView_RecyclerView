@@ -10,30 +10,19 @@
     android:layout_height="wrap_content"
     >
 
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/switchcompat"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_marginBottom="2dp"
-        android:layout_marginTop="2dp"
-        android:background="@color/colorPrimary"
-        android:text="@string/textSwitchListView"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:switchMinWidth="100dp"
-        android:layout_weight="3"/>
+    <android.support.v7.widget.SearchView
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:queryHint="@string/search_hint"
+        app:iconifiedByDefault="false" />
 
-    <!--<android.support.v7.widget.AppCompatButton-->
-        <!--android:id="@+id/PickGetImage"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:text = "@string/PickGetImage"-->
-        <!--android:background="@drawable/mybutton"-->
-        <!--android:textColor="@android:color/white"-->
-        <!--android:padding="10dp">-->
-
-    <!--</android.support.v7.widget.AppCompatButton>-->
+    <!--<co.moonmonkeylabs.realmsearchview.RealmSearchView-->
+        <!--android:id="@+id/search_view_new"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:rsvHint="@string/search_hint"-->
+        <!--/>-->
 
 </android.support.v7.widget.LinearLayoutCompat>
 

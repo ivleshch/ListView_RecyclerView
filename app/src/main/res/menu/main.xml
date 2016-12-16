@@ -5,6 +5,8 @@
     <!--<item android:title="@string/itemListView" app:showAsAction="never" android:orderInCategory="100" android:id="@+id/itemListView"/>-->
     <item android:title="@string/PickGetImageTitle" app:showAsAction="never" android:orderInCategory="100" android:id="@+id/pick_get_image"/>
     <item android:title="@string/Contacts" app:showAsAction="never" android:orderInCategory="100" android:id="@+id/contacts"/>
+
+    <item android:title="@string/RefreshBase" app:showAsAction="never" android:orderInCategory="100" android:id="@+id/fillBase"/>
 </menu>
 
 
