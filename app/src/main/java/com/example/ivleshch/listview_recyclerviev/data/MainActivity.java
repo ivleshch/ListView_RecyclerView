@@ -3,6 +3,7 @@ package com.example.ivleshch.listview_recyclerviev.data;
 import android.Manifest;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.SwitchCompat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.ivleshch.listview_recyclerviev.R;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     private Realm realm;
     private ArrayList<StudentInformation> studentsInformation;
+    final String PREFS_NAME = "MyPrefsFile";
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -55,28 +58,19 @@ public class MainActivity extends AppCompatActivity {
 
         studentsInformation = informationAboutStudents();
 
-//        final SearchView search = (SearchView) findViewById( R.id.search);
-//        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                Toast.makeText(search.getContext(), "1", Toast.LENGTH_SHORT).show();
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                Toast.makeText(search.getContext(), "2", Toast.LENGTH_SHORT).show();
-//                return false;
-//            }
-//        });
-//        search.setOnQueryTextListener(listener);
-//
-//        SearchView.OnQueryTextListener listener = new SearchView.OnQueryTextListener()
-
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_list_recycler, recyclerViewActivity)
                     .commit();
+        }
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+
+        if (settings.getBoolean("my_first_time", true)) {
+            saveUsers(getDummyUsers());
+            settings.edit().putBoolean("my_first_time", false).apply();
         }
 
     }
@@ -102,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (id == R.id.fillBase) {
             saveUsers(getDummyUsers());
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             return true;
         }
         return super.onOptionsItemSelected(item);

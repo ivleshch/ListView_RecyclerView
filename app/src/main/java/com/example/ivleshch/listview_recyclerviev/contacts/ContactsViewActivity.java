@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.WindowManager;
 
 import com.example.ivleshch.listview_recyclerviev.R;
 import com.example.ivleshch.listview_recyclerviev.broadcastreceivers.Receivers;
@@ -23,6 +24,7 @@ public class ContactsViewActivity extends AppCompatActivity {
                     .add(R.id.fragment_contactsView, new ContactsViewFragment())
                     .commit();
         }
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     @Override
