@@ -45,12 +45,16 @@ public class RecyclerViewActivity extends Fragment {
 
 
     private void updateUI(RealmResults<StudentInformationRealm> elements) {
-//        if (rvUsers.getAdapter() == null) {
+        if (rvUsers.getAdapter() == null) {
             rvUsers.setAdapter(new RecyclerViewAdapter(getActivity(), elements));
-//        } else {
-//            RecyclerViewAdapter adapter = (RecyclerViewAdapter) rvUsers.getAdapter();
-//            adapter.notifyDataSetChanged();
-//        }
+        } else {
+            RecyclerViewAdapter adapter = (RecyclerViewAdapter) rvUsers.getAdapter();
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    private void updateUIRefreshAll(RealmResults<StudentInformationRealm> elements) {
+        rvUsers.setAdapter(new RecyclerViewAdapter(getActivity(), elements));
     }
 
     @Override
@@ -63,18 +67,15 @@ public class RecyclerViewActivity extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-        final SearchView search = (SearchView) view.findViewById( R.id.search);
+        final SearchView search = (SearchView) view.findViewById(R.id.search);
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-//                Toast.makeText(search.getContext(), "45", Toast.LENGTH_SHORT).show();
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-//                RealmResults<StudentInformationRealm> users = realm.where(StudentInformationRealm.class)
-//                        .findAllAsync();
                 realm = Realm.getDefaultInstance();
                 RealmResults<StudentInformationRealm> users = realm.where(StudentInformationRealm.class)
                         .beginGroup()
@@ -82,11 +83,9 @@ public class RecyclerViewActivity extends Fragment {
                         .or()
                         .contains("name",newText)
                         .endGroup()
-                        .findAllSorted("searchName");
+                        .findAllSorted("searchName",Sort.ASCENDING);
                 users.addChangeListener(changeListener);
-                updateUI(users);
-
-//                Toast.makeText(search.getContext(), "47", Toast.LENGTH_SHORT).show();
+                updateUIRefreshAll(users);
                 return false;
             }
         });
@@ -97,7 +96,7 @@ public class RecyclerViewActivity extends Fragment {
         realm = Realm.getDefaultInstance();
 
         RealmResults<StudentInformationRealm> users = realm.where(StudentInformationRealm.class)
-                .findAllSortedAsync("searchName");
+                .findAllSortedAsync("searchName",Sort.ASCENDING);
         users.addChangeListener(changeListener);
 
         rvUsers.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity()).build());
@@ -124,7 +123,8 @@ public class RecyclerViewActivity extends Fragment {
                     ;
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
-                    rawUsersList.deleteAllFromRealm();
+                    rawUsersList.deleteFirstFromRealm();
+                    //deleteAllFromRealm();
                     realm.commitTransaction();
                     realm.close();
                 }

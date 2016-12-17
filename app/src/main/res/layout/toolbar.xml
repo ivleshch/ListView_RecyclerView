@@ -5,6 +5,13 @@
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary">
 
+    <!--<co.moonmonkeylabs.realmsearchview.RealmSearchView-->
+        <!--android:id="@+id/search_view_new"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:rsvHint="@string/search_hint"-->
+        <!--/>-->
+
 <android.support.v7.widget.LinearLayoutCompat
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -17,12 +24,7 @@
         app:queryHint="@string/search_hint"
         app:iconifiedByDefault="false" />
 
-    <!--<co.moonmonkeylabs.realmsearchview.RealmSearchView-->
-        <!--android:id="@+id/search_view_new"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--app:rsvHint="@string/search_hint"-->
-        <!--/>-->
+
 
 </android.support.v7.widget.LinearLayoutCompat>
 
